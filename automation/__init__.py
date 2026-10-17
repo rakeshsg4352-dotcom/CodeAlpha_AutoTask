@@ -1,0 +1,3 @@
+"""
+Automation application package.
+"""

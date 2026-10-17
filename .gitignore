@@ -1,0 +1,35 @@
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment Variables & Secrets (Keep .env.example, never commit .env)
+.env
+.env.local
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database & SQLite files
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# Static & Media uploads (Keep structure)
+staticfiles/
+media/uploads/*
+media/generated/*
+!media/workspace/
+!media/workspace/**
+
+# Logs
+*.log
+local_settings.py

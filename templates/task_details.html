@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Details #{{ task.id }} - AutoTask{% endblock %}
+{% block breadcrumb %}History / Task #{{ task.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <h1 class="page-title">Task #{{ task.id }}: {{ task.task_name }}</h1>
+        <span class="badge {{ task.status_badge_class }}">{{ task.get_status_display }}</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        {% if task.output_file and task.status == 'SUCCESS' %}
+            <a href="{% url 'download_output' task.id %}" class="btn btn-success">
+                <span>📥 Download Output File</span>
+            </a>
+        {% endif %}
+        <a href="{% url 'history' %}" class="btn btn-secondary">
+            <span>&larr; Back to History</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Main Task Information -->
+    <div class="card">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">Execution Overview</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Task ID</span>
+                <span style="font-weight: 700;">#{{ task.id }}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Automation Type</span>
+                <span style="font-weight: 600;">{{ task.get_task_type_display }}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Executed By</span>
+                <span><code>{{ task.user.username }}</code></span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Started At</span>
+                <span>{{ task.started_at|date:"Y-m-d H:i:s"|default:task.created_at|date:"Y-m-d H:i:s" }}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Completed At</span>
+                <span>{{ task.completed_at|date:"Y-m-d H:i:s"|default:"In Progress / Interrupted" }}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Total Duration</span>
+                <span style="font-weight: 600;">
+                    {% if task.duration_seconds is not None %}
+                        {{ task.duration_seconds }} seconds
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text-muted); font-weight: 500;">Output Document</span>
+                <span>
+                    {% if task.output_file %}
+                        <code>{{ task.output_filename }}</code>
+                    {% else %}
+                        <span style="color: var(--text-light);">No output file</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 6px;">Input Parameters Summary</label>
+            <div style="background: var(--bg-muted); padding: 12px; border-radius: var(--radius-sm); font-size: 13.5px; word-break: break-all;">
+                {{ task.input_summary }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Results & Errors -->
+    <div>
+        {% if task.status == 'SUCCESS' %}
+            <div class="card alert-success" style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--success-text); margin-bottom: 8px;">Execution Outcome</h3>
+                <p style="font-size: 14px; line-height: 1.6;">
+                    {{ task.result_summary }}
+                </p>
+                {% if task.output_file %}
+                    <div style="margin-top: 14px;">
+                        <a href="{% url 'download_output' task.id %}" class="btn btn-sm btn-success">
+                            📥 Download Output Document
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% elif task.status == 'FAILED' %}
+            <div class="card alert-danger" style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--danger-text); margin-bottom: 8px;">Execution Failure Notice</h3>
+                <p style="font-size: 13.5px; line-height: 1.6;">
+                    <strong>Error Message:</strong> {{ task.error_message }}
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Audit Activity Trail -->
+        <div class="card">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 14px;">Task Audit Trail</h3>
+            {% if activities %}
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for act in activities %}
+                    <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 12px; margin-top: 2px;">⚡</span>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-main);">{{ act.action }}</div>
+                            <div style="color: var(--text-muted); font-size: 12px;">{{ act.details }}</div>
+                            <div style="font-size: 11px; color: var(--text-light); margin-top: 2px;">{{ act.timestamp|date:"Y-m-d H:i:s" }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="font-size: 13px; color: var(--text-muted);">No granular activities logged for this task.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

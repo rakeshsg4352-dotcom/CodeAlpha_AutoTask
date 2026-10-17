@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Extract Email Addresses - AutoTask{% endblock %}
+{% block breadcrumb %}Automation / Extract Emails{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Email Address Extractor</h1>
+        <p class="page-subtitle">Upload a text file to identify, filter, deduplicate, and export all email addresses.</p>
+    </div>
+    <a href="{% url 'tasks' %}" class="btn btn-secondary">
+        <span>&larr; Back to Tasks</span>
+    </a>
+</div>
+
+<div class="grid-2">
+    <!-- File Upload Form -->
+    <div class="card">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Select Input File</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+            Supported format: Plain text (<code>.txt</code>), up to 5 MB.
+        </p>
+
+        <form id="extractEmailsForm" method="POST" action="{% url 'extract_emails' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="upload-dropzone" id="uploadDropzone">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <div class="upload-title">Click to browse or drag and drop your .txt file</div>
+                <div class="upload-subtitle">TXT files only, maximum 5 MB</div>
+                <div id="selectedFileName" class="selected-filename-display"></div>
+            </div>
+
+            <!-- Hidden actual file input -->
+            <div style="display: none;">
+                {{ form.file }}
+            </div>
+            {% if form.file.errors %}
+                <div class="form-error" style="margin-top: 8px;">{{ form.file.errors.0 }}</div>
+            {% endif %}
+
+            <!-- Loader Indicator -->
+            <div id="extractLoader" class="loading-overlay">
+                <div class="spinner spinner-primary" style="margin-bottom: 8px;"></div>
+                <div>Scanning file content and extracting unique email addresses...</div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-purple" style="flex: 2;">
+                    <span>✉️ Extract Emails</span>
+                </button>
+                <button type="reset" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('extractResultBox').style.display='none'; document.getElementById('selectedFileName').style.display='none';">
+                    <span>Reset</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Dynamic Results Area -->
+        <div id="extractResultBox" style="display: none; margin-top: 24px;"></div>
+    </div>
+
+    <!-- Usage Guide & Sample Demonstration -->
+    <div>
+        <div class="card" style="margin-bottom: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">📋 Example Input Format</h3>
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+                AutoTask automatically parses unstructured paragraphs, email headers, log entries, and lists:
+            </p>
+            <div style="background: var(--bg-muted); padding: 14px; border-radius: var(--radius-sm); font-family: monospace; font-size: 12.5px; line-height: 1.6; color: var(--text-main);">
+                Hello Team,<br>
+                Contact us at support@example.com.<br>
+                For enterprise sales, write to sales@example.org.<br>
+                Our administrator email is admin@example.com.<br>
+                Feel free to email support@example.com again anytime.
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--purple);">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">⚙️ Algorithm Features</h3>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+                <li><strong>Regex Pattern Recognition:</strong> Uses RFC-compatible pattern matching (<code>re</code> module).</li>
+                <li><strong>Order Preservation:</strong> Duplicate occurrences (e.g. repeated <code>support@example.com</code>) are stripped while strictly maintaining first-seen order.</li>
+                <li><strong>Punctuation Trimming:</strong> Trailing sentence punctuation (dots, commas) is cleanly stripped from addresses.</li>
+                <li><strong>Export & Archival:</strong> Generates a clean text file in your media storage, ready to download instantly.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

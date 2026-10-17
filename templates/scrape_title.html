@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Scrape Webpage Title - AutoTask{% endblock %}
+{% block breadcrumb %}Automation / Scrape Webpage Title{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Webpage Title Scraper</h1>
+        <p class="page-subtitle">Fetch a public webpage, extract its HTML &lt;title&gt; tag, and export the result.</p>
+    </div>
+    <a href="{% url 'tasks' %}" class="btn btn-secondary">
+        <span>&larr; Back to Tasks</span>
+    </a>
+</div>
+
+<div class="grid-2">
+    <!-- URL Input Card -->
+    <div class="card">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Target Webpage</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+            Provide a complete HTTP or HTTPS URL to any public internet webpage.
+        </p>
+
+        <form id="scrapeTitleForm" method="POST" action="{% url 'scrape_title' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="id_url">Webpage URL</label>
+                {{ form.url }}
+                {% if form.url.errors %}
+                    <div class="form-error">{{ form.url.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">
+                    Example: <code>https://example.com</code> or <code>https://www.python.org</code>
+                </div>
+            </div>
+
+            <!-- Loader Indicator -->
+            <div id="scrapeLoader" class="loading-overlay">
+                <div class="spinner spinner-primary" style="margin-bottom: 8px;"></div>
+                <div>Resolving DNS, performing SSRF validation, and parsing HTML...</div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="flex: 2; background: linear-gradient(135deg, #0284c7, #0369a1);">
+                    <span>🌐 Scrape Title</span>
+                </button>
+                <button type="reset" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('scrapeResultBox').style.display='none';">
+                    <span>Reset</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Dynamic Results Area -->
+        <div id="scrapeResultBox" style="display: none; margin-top: 24px;"></div>
+    </div>
+
+    <!-- Security & SSRF Information -->
+    <div>
+        <div class="card" style="border-left: 4px solid #0284c7; margin-bottom: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">🛡️ Server-Side Request Forgery (SSRF) Defense</h3>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px;">
+                Because server-side scrapers initiate HTTP requests on behalf of users, AutoTask enforces strict security controls:
+            </p>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+                <li><strong>Localhost & Loopback Block:</strong> Addresses like <code>127.0.0.1</code>, <code>localhost</code>, and <code>::1</code> are rejected before requests are sent.</li>
+                <li><strong>Private IP Blocking:</strong> Subnets in <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>, and <code>169.254.169.254</code> (cloud metadata) are blocked.</li>
+                <li><strong>DNS Validation:</strong> Every hostname is resolved to its IP address via DNS and verified.</li>
+                <li><strong>Redirect Inspection:</strong> HTTP redirects (301/302) are re-validated on every hop to prevent redirect bypass attacks.</li>
+                <li><strong>Safe Resource Limits:</strong> Enforces 5-second timeouts and maximum 1MB response caps.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">⚙️ Technology Stack</h3>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                <div>• <strong>HTTP Client:</strong> <code>requests</code> with custom User-Agent and streamed chunks</div>
+                <div>• <strong>HTML Parser:</strong> <code>BeautifulSoup4</code> with standard Python <code>html.parser</code></div>
+                <div>• <strong>Storage:</strong> Output saved as TXT file in media directory</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

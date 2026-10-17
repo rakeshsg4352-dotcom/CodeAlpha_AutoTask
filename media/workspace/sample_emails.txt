@@ -1,0 +1,15 @@
+Academic Project Demonstration - AutoTask
+==================================================
+Welcome to the sample document for email extraction.
+
+Contact our primary support channel at: support@autotask.org.
+For academic inquiries and submissions: professor.smith@university.edu.
+Our lead developer can be reached at: developer@example.com.
+Enterprise customer relations: sales@corporation.com.
+
+Duplicate test:
+Please don't forget to CC support@autotask.org on every critical bug report.
+Also notify developer@example.com once reviewed.
+
+Best regards,
+AutoTask Automation Bot

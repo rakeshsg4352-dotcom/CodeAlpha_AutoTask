@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Automation History - AutoTask{% endblock %}
+{% block breadcrumb %}Automation History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Automation History</h1>
+        <p class="page-subtitle">Inspect historical task executions, filter by status or task type, and download outputs.</p>
+    </div>
+    <div style="font-size: 13.5px; color: var(--text-muted);">
+        Total Logged: <strong>{{ total_count }}</strong> tasks
+    </div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
+    <form method="GET" action="{% url 'history' %}" style="display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;">
+        <div style="flex: 2; min-width: 200px;">
+            <label class="form-label" style="font-size: 12.5px;" for="searchInput">Search Task</label>
+            <input type="text" id="searchInput" name="q" class="form-control" placeholder="Search by name or input..." value="{{ q }}">
+        </div>
+
+        <div style="flex: 1; min-width: 150px;">
+            <label class="form-label" style="font-size: 12.5px;" for="typeSelect">Task Type</label>
+            <select id="typeSelect" name="task_type" class="form-control">
+                <option value="">All Types</option>
+                <option value="MOVE_JPG" {% if task_type == 'MOVE_JPG' %}selected{% endif %}>JPG File Organizer</option>
+                <option value="EXTRACT_EMAILS" {% if task_type == 'EXTRACT_EMAILS' %}selected{% endif %}>Email Extractor</option>
+                <option value="SCRAPE_TITLE" {% if task_type == 'SCRAPE_TITLE' %}selected{% endif %}>Title Scraper</option>
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 130px;">
+            <label class="form-label" style="font-size: 12.5px;" for="statusSelect">Status</label>
+            <select id="statusSelect" name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="SUCCESS" {% if status == 'SUCCESS' %}selected{% endif %}>Success</option>
+                <option value="FAILED" {% if status == 'FAILED' %}selected{% endif %}>Failed</option>
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 130px;">
+            <label class="form-label" style="font-size: 12.5px;" for="sortSelect">Sort Date</label>
+            <select id="sortSelect" name="sort" class="form-control">
+                <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Newest First</option>
+                <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Oldest First</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary" style="padding: 10px 16px;">
+                <span>Filter</span>
+            </button>
+            <a href="{% url 'history' %}" class="btn btn-outline" style="padding: 10px 14px;" title="Reset filters">
+                <span>Reset</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- History Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">ID</th>
+                        <th>Task Name</th>
+                        <th>Execution Date</th>
+                        <th>Execution Time</th>
+                        <th>Status</th>
+                        <th>Short Result</th>
+                        <th style="text-align: right; min-width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in page_obj %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--text-muted);">#{{ task.id }}</td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--text-main);">{{ task.task_name }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ task.input_summary }}
+                            </div>
+                        </td>
+                        <td style="font-size: 13px; color: var(--text-muted);">
+                            {{ task.created_at|date:"Y-m-d" }}
+                        </td>
+                        <td style="font-size: 13px; color: var(--text-muted);">
+                            {{ task.created_at|date:"H:i:s" }}
+                            {% if task.duration_seconds %}
+                                <span style="font-size: 11px; color: var(--text-light);">({{ task.duration_seconds }}s)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ task.status_badge_class }}">{{ task.get_status_display }}</span>
+                        </td>
+                        <td style="font-size: 13px; color: var(--text-main); max-width: 280px;">
+                            {% if task.status == 'SUCCESS' %}
+                                <span style="color: var(--success-text);">{{ task.result_summary|truncatechars:65 }}</span>
+                            {% elif task.status == 'FAILED' %}
+                                <span style="color: var(--danger-text);">{{ task.error_message|truncatechars:65 }}</span>
+                            {% else %}
+                                <span>Running...</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 6px; align-items: center;">
+                                <a href="{% url 'task_details' task.id %}" class="btn btn-sm btn-secondary" title="View full execution details">
+                                    Details
+                                </a>
+                                {% if task.output_file and task.status == 'SUCCESS' %}
+                                    <a href="{% url 'download_output' task.id %}" class="btn btn-sm btn-success" title="Download output text file">
+                                        📥 Download
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if page_obj.has_other_pages %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg-muted);">
+            <div style="font-size: 13px; color: var(--text-muted);">
+                Showing page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&task_type={{ task_type }}&status={{ status }}&sort={{ sort_order }}" class="btn btn-sm btn-outline">&larr; Previous</a>
+                {% endif %}
+
+                {% for p in page_obj.paginator.page_range %}
+                    {% if p == page_obj.number %}
+                        <span class="btn btn-sm btn-primary" style="cursor: default;">{{ p }}</span>
+                    {% elif p >= page_obj.number|add:"-2" and p <= page_obj.number|add:"2" %}
+                        <a href="?page={{ p }}&q={{ q }}&task_type={{ task_type }}&status={{ status }}&sort={{ sort_order }}" class="btn btn-sm btn-outline">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&task_type={{ task_type }}&status={{ status }}&sort={{ sort_order }}" class="btn btn-sm btn-outline">Next &rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div style="text-align: center; padding: 48px 24px; color: var(--text-muted);">
+            <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-main);">No matching automation records found</h4>
+            <p style="font-size: 13.5px; margin-top: 4px;">Try modifying your search or filter options, or execute a new automation task.</p>
+            <a href="{% url 'tasks' %}" class="btn btn-primary" style="margin-top: 16px;">Launch a Task</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

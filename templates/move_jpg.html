@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Move JPG Files - AutoTask{% endblock %}
+{% block breadcrumb %}Automation / Move JPG Files{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">JPG File Organizer</h1>
+        <p class="page-subtitle">Automatically move all JPG and JPEG images from a source folder into a destination folder.</p>
+    </div>
+    <a href="{% url 'tasks' %}" class="btn btn-secondary">
+        <span>&larr; Back to Tasks</span>
+    </a>
+</div>
+
+<div class="grid-2">
+    <!-- Automation Form Card -->
+    <div class="card">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Task Parameters</h3>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+            Specify folder names relative to the approved application workspace.
+        </p>
+
+        <form id="moveJpgForm" method="POST" action="{% url 'move_jpg' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="id_source_folder">Source Folder</label>
+                {{ form.source_folder }}
+                {% if form.source_folder.errors %}
+                    <div class="form-error">{{ form.source_folder.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">
+                    Subfolder containing images. Default: <code>source_sample</code> (contains preloaded sample JPGs).
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_dest_folder">Destination Folder</label>
+                {{ form.dest_folder }}
+                {% if form.dest_folder.errors %}
+                    <div class="form-error">{{ form.dest_folder.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">
+                    Subfolder where images will be organized. Will be created automatically if it doesn't exist.
+                </div>
+            </div>
+
+            <!-- Loader Indicator -->
+            <div id="moveLoader" class="loading-overlay">
+                <div class="spinner spinner-primary" style="margin-bottom: 8px;"></div>
+                <div>Moving images and resolving filename duplicates...</div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">
+                    <span>⚡ Move Images</span>
+                </button>
+                <button type="reset" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('moveResultBox').style.display='none';">
+                    <span>Reset</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Dynamic Result Area -->
+        <div id="moveResultBox" style="display: none; margin-top: 24px;"></div>
+    </div>
+
+    <!-- Instructions & Security Information -->
+    <div>
+        <div class="card" style="margin-bottom: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">💡 How It Works</h3>
+            <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); line-height: 1.7;">
+                <li>The script uses Python's <code>os</code> and <code>shutil</code> modules.</li>
+                <li>Both <code>.jpg</code> and <code>.jpeg</code> extensions (including uppercase) are detected.</li>
+                <li><strong>Safe Duplication Handling:</strong> If a file with the same name already exists in the destination folder, AutoTask appends an incremental counter (e.g., <code>image_1.jpg</code>, <code>image_2.jpg</code>) without silently overwriting.</li>
+                <li>Subdirectories within the source folder are preserved and not altered.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--primary);">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">🛡️ Security & Safe Workspace</h3>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                To prevent unauthorized server filesystem exploration or path traversal attacks (<code>../</code>), all file operations are strictly confined to the dedicated application workspace:
+            </p>
+            <div style="margin-top: 10px; background: var(--bg-muted); padding: 10px; border-radius: var(--radius-sm); font-family: monospace; font-size: 12px; word-break: break-all;">
+                {{ workspace_path }}
+            </div>
+            
+            {% if available_folders %}
+            <div style="margin-top: 14px;">
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-main);">Current Workspace Subfolders:</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                    {% for folder in available_folders %}
+                        <span class="badge badge-secondary" style="cursor: pointer;" onclick="document.getElementById('id_source_folder').value='{{ folder }}';">
+                            📁 {{ folder }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

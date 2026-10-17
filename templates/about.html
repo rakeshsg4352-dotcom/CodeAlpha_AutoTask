@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}About Project - AutoTask{% endblock %}
+{% block breadcrumb %}About AutoTask{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">About the Project</h1>
+        <p class="page-subtitle">Academic Project: Task Automation with Python Scripts.</p>
+    </div>
+</div>
+
+<div class="grid-2" style="align-items: start;">
+    <!-- Project Description -->
+    <div class="card">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">Project Objective</h2>
+        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px;">
+            <strong>AutoTask</strong> is a robust, full-stack web-based automation platform designed to streamline repetitive daily computer tasks using Python scripts. It bridges the gap between backend command-line automation and beginner-friendly web interfaces, providing authenticated users with immediate execution, status tracking, and downloadable output files.
+        </p>
+
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 24px; margin-bottom: 12px;">Core Automation Modules</h3>
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
+            <div style="padding: 12px; background: var(--bg-muted); border-radius: var(--radius-sm); border-left: 3px solid var(--primary);">
+                <strong>1. JPG File Organizer:</strong> Uses Python's <code>os</code> and <code>shutil</code> modules to safely categorize and migrate image files into dedicated target folders while resolving filename duplicates non-destructively.
+            </div>
+            <div style="padding: 12px; background: var(--bg-muted); border-radius: var(--radius-sm); border-left: 3px solid var(--purple);">
+                <strong>2. Email Address Extractor:</strong> Employs regular expressions (<code>re</code>) to extract, validate, and order unique email addresses from uploaded plain text documents, exporting the clean list into a downloadable file.
+            </div>
+            <div style="padding: 12px; background: var(--bg-muted); border-radius: var(--radius-sm); border-left: 3px solid #0284c7;">
+                <strong>3. Webpage Title Scraper:</strong> Fetches remote public HTML using <code>requests</code> and <code>BeautifulSoup4</code> to retrieve the page <code>&lt;title&gt;</code>, featuring industry-standard Server-Side Request Forgery (SSRF) defenses.
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack & Architecture -->
+    <div>
+        <div class="card" style="margin-bottom: 20px;">
+            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 14px;">Technology Stack</h2>
+            <div style="font-size: 13.5px; line-height: 1.8; color: var(--text-muted);">
+                <div>💻 <strong>Frontend:</strong> HTML5, CSS3, Vanilla JavaScript (Fetch API, DOM manipulation)</div>
+                <div>🐍 <strong>Backend:</strong> Python, Django Web Framework (MVT Architecture)</div>
+                <div>🗄️ <strong>Database:</strong> MySQL Server managed via XAMPP, Django ORM</div>
+                <div>🛡️ <strong>Security:</strong> Django CSRF Protection, Password Hashing, SSRF Guard, Safe Workspace Isolation</div>
+                <div>🖥️ <strong>Environment:</strong> Windows 10/11, PyCharm Professional/Community, XAMPP</div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--success);">
+            <h2 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">Key Security Principles</h2>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+                <li><strong>Safe Workspace Jail:</strong> File operations cannot traverse outside the administrator-approved workspace root directory.</li>
+                <li><strong>SSRF Defense-in-Depth:</strong> Scraper rejects loopback, private RFC-1918 subnets, cloud metadata IPs, and re-validates DNS on every redirect.</li>
+                <li><strong>Ownership Isolation:</strong> Regular users can only access and download records and files they generated.</li>
+                <li><strong>Audit Logging:</strong> All execution starts, successes, failures, and file downloads are permanently recorded in the database.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

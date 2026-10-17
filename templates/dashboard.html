@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - AutoTask System{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Welcome back, {{ user.username }}! 👋</h1>
+        <p class="page-subtitle">Monitor your automated scripts, review metrics, and launch Python workflows.</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'tasks' %}" class="btn btn-primary">
+            <span>⚡ Launch New Task</span>
+        </a>
+        <a href="{% url 'history' %}" class="btn btn-secondary">
+            <span>📜 View All History</span>
+        </a>
+    </div>
+</div>
+
+<!-- 1. Statistics Cards -->
+<div class="grid-4">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <div>
+            <div class="stat-val">{{ total_tasks }}</div>
+            <div class="stat-label">Total Executions</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <div class="stat-val" style="color: var(--success);">{{ successful_tasks }}</div>
+            <div class="stat-label">Successful Tasks</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <div class="stat-val" style="color: var(--danger);">{{ failed_tasks }}</div>
+            <div class="stat-label">Failed Tasks</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        </div>
+        <div>
+            <div class="stat-val" style="color: var(--purple);">{{ success_rate }}%</div>
+            <div class="stat-label">Success Rate</div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Three Main Automation Cards -->
+<div style="margin-bottom: 32px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main);">Available Automation Tools</h2>
+        <a href="{% url 'tasks' %}" style="font-size: 13px; font-weight: 600;">View task details &rarr;</a>
+    </div>
+
+    <div class="grid-3">
+        <!-- CARD 1: JPG File Organizer -->
+        <div class="tool-card">
+            <div>
+                <div class="tool-top">
+                    <div class="tool-icon blue">📁</div>
+                    <span class="tool-tag">Filesystem</span>
+                </div>
+                <h3 class="tool-name">JPG File Organizer</h3>
+                <p class="tool-desc">Automatically move all JPG and JPEG images from a selected source folder into a destination folder with safe duplicate resolution.</p>
+                
+                <div class="tool-meta">
+                    <strong>Library:</strong> <code>os</code>, <code>shutil</code>
+                </div>
+
+                <div style="font-size: 12.5px; margin-bottom: 16px; color: var(--text-muted);">
+                    Last Status: 
+                    {% if last_move_jpg %}
+                        <span class="badge {{ last_move_jpg.status_badge_class }}">{{ last_move_jpg.get_status_display }}</span>
+                        <span style="font-size: 11px; margin-left: 4px;">({{ last_move_jpg.created_at|timesince }} ago)</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Not run yet</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{% url 'move_jpg' %}" class="btn btn-primary btn-block">
+                <span>Open File Organizer</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <!-- CARD 2: Email Address Extractor -->
+        <div class="tool-card">
+            <div>
+                <div class="tool-top">
+                    <div class="tool-icon purple">✉️</div>
+                    <span class="tool-tag">Text Processing</span>
+                </div>
+                <h3 class="tool-name">Email Address Extractor</h3>
+                <p class="tool-desc">Extract email addresses from a user-provided TXT file and save the unique extracted email addresses into a downloadable text file.</p>
+                
+                <div class="tool-meta">
+                    <strong>Library:</strong> <code>re</code>, File I/O
+                </div>
+
+                <div style="font-size: 12.5px; margin-bottom: 16px; color: var(--text-muted);">
+                    Last Status: 
+                    {% if last_extract_emails %}
+                        <span class="badge {{ last_extract_emails.status_badge_class }}">{{ last_extract_emails.get_status_display }}</span>
+                        <span style="font-size: 11px; margin-left: 4px;">({{ last_extract_emails.created_at|timesince }} ago)</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Not run yet</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{% url 'extract_emails' %}" class="btn btn-purple btn-block">
+                <span>Extract Emails</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <!-- CARD 3: Webpage Title Scraper -->
+        <div class="tool-card">
+            <div>
+                <div class="tool-top">
+                    <div class="tool-icon cyan">🌐</div>
+                    <span class="tool-tag">Web Scraping</span>
+                </div>
+                <h3 class="tool-name">Webpage Title Scraper</h3>
+                <p class="tool-desc">Retrieve the title of a specified public webpage and save the title into a text file, featuring hardened SSRF security filters.</p>
+                
+                <div class="tool-meta">
+                    <strong>Library:</strong> <code>requests</code>, <code>BeautifulSoup</code>
+                </div>
+
+                <div style="font-size: 12.5px; margin-bottom: 16px; color: var(--text-muted);">
+                    Last Status: 
+                    {% if last_scrape_title %}
+                        <span class="badge {{ last_scrape_title.status_badge_class }}">{{ last_scrape_title.get_status_display }}</span>
+                        <span style="font-size: 11px; margin-left: 4px;">({{ last_scrape_title.created_at|timesince }} ago)</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Not run yet</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{% url 'scrape_title' %}" class="btn btn-primary btn-block" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                <span>Scrape Webpage Title</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Recent Executions & System Activity -->
+<div class="grid-2">
+    <!-- Latest Tasks Table -->
+    <div class="card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Latest Task History</h3>
+            <a href="{% url 'history' %}" style="font-size: 13px;">View All</a>
+        </div>
+
+        {% if recent_tasks %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in recent_tasks %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">{{ task.task_name }}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">{{ task.created_at|date:"M d, H:i" }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {{ task.status_badge_class }}">{{ task.get_status_display }}</span>
+                            </td>
+                            <td style="font-size: 13px; color: var(--text-muted);">
+                                {% if task.duration_seconds %}{{ task.duration_seconds }}s{% else %}-{% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'task_details' task.id %}" class="btn btn-sm btn-outline">Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+                <p style="font-size: 14px;">No automation tasks executed yet.</p>
+                <a href="{% url 'tasks' %}" class="btn btn-sm btn-primary" style="margin-top: 10px;">Run First Task</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Activity Audit Log -->
+    <div class="card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Recent Activity Log</h3>
+            <span style="font-size: 12px; color: var(--text-light);">Audit Trail</span>
+        </div>
+
+        {% if recent_activities %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for act in recent_activities %}
+                <div style="display: flex; align-items: flex-start; gap: 12px; font-size: 13px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+                    <div style="font-size: 14px; margin-top: 1px;">
+                        {% if 'SUCCESS' in act.action %}🟢{% elif 'FAIL' in act.action %}🔴{% elif 'LOGIN' in act.action %}🔑{% else %}⚡{% endif %}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: var(--text-main);">{{ act.action }}</div>
+                        <div style="color: var(--text-muted); font-size: 12.5px; margin-top: 2px;">{{ act.details }}</div>
+                        <div style="font-size: 11px; color: var(--text-light); margin-top: 3px;">{{ act.timestamp|timesince }} ago</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+                <p style="font-size: 14px;">No activities recorded yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

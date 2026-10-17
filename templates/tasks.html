@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Automation Tasks Catalog - AutoTask{% endblock %}
+{% block breadcrumb %}Automation Tasks{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Python Automation Tasks</h1>
+        <p class="page-subtitle">Select an automation module below to execute automated file operations, text processing, or web scraping.</p>
+    </div>
+</div>
+
+<div class="grid-3" style="align-items: stretch;">
+    <!-- TASK 1 -->
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div class="stat-icon blue" style="font-size: 24px;">📁</div>
+                <span class="badge badge-secondary">Task #1</span>
+            </div>
+            
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">JPG File Organizer</h2>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
+                Scans a designated source directory, identifies all image files ending with <code>.jpg</code> and <code>.jpeg</code> (case-insensitive), and moves them into a destination directory.
+            </p>
+
+            <div style="background: var(--bg-muted); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: 13px;">
+                <div style="margin-bottom: 6px;"><strong>Core Libraries:</strong> <code>os</code>, <code>shutil</code>, <code>pathlib</code></div>
+                <div style="margin-bottom: 6px;"><strong>Security Policy:</strong> Confined to administrator-approved workspace</div>
+                <div><strong>Duplicate Handling:</strong> Non-destructive filename incrementation</div>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size: 12.5px; margin-bottom: 14px; color: var(--text-muted);">
+                Latest Status:
+                {% if last_move_jpg %}
+                    <span class="badge {{ last_move_jpg.status_badge_class }}">{{ last_move_jpg.get_status_display }}</span>
+                {% else %}
+                    <span class="badge badge-secondary">Not run yet</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'move_jpg' %}" class="btn btn-primary btn-block">
+                <span>Launch JPG Organizer</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- TASK 2 -->
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div class="stat-icon purple" style="font-size: 24px;">✉️</div>
+                <span class="badge badge-secondary">Task #2</span>
+            </div>
+
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Email Address Extractor</h2>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
+                Accepts user-uploaded <code>.txt</code> documents, searches through the text using robust regex pattern recognition, deduplicates entries while preserving original order, and outputs a downloadable file.
+            </p>
+
+            <div style="background: var(--bg-muted); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: 13px;">
+                <div style="margin-bottom: 6px;"><strong>Core Libraries:</strong> <code>re</code>, Python File I/O</div>
+                <div style="margin-bottom: 6px;"><strong>Accepted Formats:</strong> <code>.txt</code> (Plain Text, max 5 MB)</div>
+                <div><strong>Output:</strong> Downloadable text document (.txt)</div>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size: 12.5px; margin-bottom: 14px; color: var(--text-muted);">
+                Latest Status:
+                {% if last_extract_emails %}
+                    <span class="badge {{ last_extract_emails.status_badge_class }}">{{ last_extract_emails.get_status_display }}</span>
+                {% else %}
+                    <span class="badge badge-secondary">Not run yet</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'extract_emails' %}" class="btn btn-purple btn-block">
+                <span>Launch Email Extractor</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- TASK 3 -->
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div class="stat-icon" style="background: #e0f2fe; color: #0284c7; font-size: 24px;">🌐</div>
+                <span class="badge badge-secondary">Task #3</span>
+            </div>
+
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Webpage Title Scraper</h2>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
+                Connects to any public HTTP or HTTPS web address, inspects the HTML DOM, and retrieves the content of the document <code>&lt;title&gt;</code> tag with SSRF security protection.
+            </p>
+
+            <div style="background: var(--bg-muted); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: 13px;">
+                <div style="margin-bottom: 6px;"><strong>Core Libraries:</strong> <code>requests</code>, <code>bs4 (BeautifulSoup)</code></div>
+                <div style="margin-bottom: 6px;"><strong>Security Filter:</strong> Hardened SSRF defense (blocks private IPs)</div>
+                <div><strong>Output:</strong> Downloadable text document (.txt)</div>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size: 12.5px; margin-bottom: 14px; color: var(--text-muted);">
+                Latest Status:
+                {% if last_scrape_title %}
+                    <span class="badge {{ last_scrape_title.status_badge_class }}">{{ last_scrape_title.get_status_display }}</span>
+                {% else %}
+                    <span class="badge badge-secondary">Not run yet</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'scrape_title' %}" class="btn btn-primary btn-block" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                <span>Launch Title Scraper</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
